@@ -1,4 +1,4 @@
-from telegram.ext import Updater, Filters, MessageHandler, CommandHandler
+from telegram.ext import Updater, Filters, MessageHandler
 from telegram.ext import CallbackContext, CommandHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 TOKEN = "5059606687:AAFepvWE7Tcw9lWBe1HtHj1hMbEF-vs3qRA"
