@@ -1,6 +1,7 @@
 from telegram.ext import Updater, Filters, MessageHandler
 from telegram.ext import CallbackContext, CommandHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
+import map_api
 TOKEN = "5059606687:AAFepvWE7Tcw9lWBe1HtHj1hMbEF-vs3qRA"
 
 
@@ -24,7 +25,11 @@ def faq(update, context):
 
 
 def news(update, context):
-    update.message.reply_text("news")
+    context.bot.send_photo(
+        update.message.chat_id,
+        map_api.get_static_api(),
+        caption='Вот тебе карта'
+    )
 
 
 def register(update, context):
@@ -88,8 +93,7 @@ def main():
                                   pass_job_queue=True,
                                   pass_chat_data=True))
     dp.add_handler(CommandHandler("unset", unset_timer, pass_chat_data=True))
-    text_handler = MessageHandler(Filters.text, echo)
-    dp.add_handler(text_handler)  # регистрация обработчика в диспетчере
+    dp.add_handler(MessageHandler(Filters.text, echo))  # регистрация обработчика в диспетчере
 
     updater.start_polling()  # запуск цикла приема и обработки сообщений
 
