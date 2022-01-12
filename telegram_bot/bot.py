@@ -3,6 +3,7 @@ from telegram.ext import CallbackContext, CommandHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 import map_api
 TOKEN = ""
+# Next in this file will be work with postgresql and passport scan
 
 
 def start(update, context):
