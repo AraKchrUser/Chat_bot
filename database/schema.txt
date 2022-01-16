@@ -1,0 +1,162 @@
+
+CREATE TABLE FAQ
+(
+	id_mfc               INTEGER REFERENCES MFC (id_mfc) ,
+	id_qu               INTEGER NOT NULL ,
+	Question               VARCHAR2(20) NULL ,
+	Answer                VARCHAR2(20) NULL ,
+	PRIMARY KEY (id_mfc, id_qu) ,
+	FOREIGN KEY (id_mfc) REFERENCES MFC (id_mfc)
+);
+
+
+
+
+CREATE TABLE Document
+(
+	id_doc               INTEGER PRIMARY KEY ,
+	Name         VARCHAR2(20) NOT NULL
+);
+
+
+
+
+CREATE TABLE Applicant
+(
+	id_app              INTEGER PRIMARY KEY ,
+	Photo                 BLOB NULL ,
+	Verified          CHAR(18) NULL ,
+	FOREIGN KEY (id_app) REFERENCES Person (id) ON DELETE CASCADE
+);
+
+
+
+
+CREATE TABLE Service_Mfc
+(
+	id_reg              INTEGER NOT NULL ,
+	id_mfc               INTEGER NOT NULL ,
+	PRIMARY KEY (id_reg, id_mfc)
+	??????????????????????????????????
+);
+
+
+
+
+CREATE TABLE Applicant_Service
+(
+	id_app              INTEGER NOT NULL ,
+	id_reg               INTEGER NOT NULL ,
+	PRIMARY KEY (id_app, id_reg) ,
+	FOREIGN KEY (id_app) REFERENCES Applicant (id_app) ,
+	FOREIGN KEY (id_reg) REFERENCES Registration (id_reg)
+);
+
+
+
+
+CREATE TABLE MFC
+(
+	id_mfc               INTEGER PRIMARY KEY,
+	Province              VARCHAR2(20) NOT NULL ,
+	City                VARCHAR2(20) NOT NULL ,
+	Address                VARCHAR2(20) NOT NULL ,
+	Geo_coord       VARCHAR2(20) NULL ,
+	Site_ref          VARCHAR2(20) NULL ,
+	Social_ref      VARCHAR2(20) NULL
+);
+
+
+
+
+CREATE TABLE New
+(
+	id_new               INTEGER PRIMARY KEY ,
+	id_mfc           INTEGER REFERENCES MFC (id_mfc) ,
+	Content           CHAR(18) NULL ,
+	Date_publ                 DATE NULL ,
+	Relevance        CHAR(18) NULL ,
+	Source             VARCHAR2(20) NULL ,
+	FOREIGN KEY (id_mfc) REFERENCES MFC (id_mfc)
+);
+
+
+
+CREATE TABLE Person
+(
+	id                   INTEGER PRIMARY KEY ,
+	Second_name              VARCHAR2(20) NULL ,
+	First_name                  VARCHAR2(20) NULL ,
+	Passport                VARCHAR2(20) NULL ,
+	Gender                  VARCHAR2(20) NULL ,
+);
+
+
+
+
+
+CREATE TABLE Registration
+(
+	id_reg               INTEGER PRIMARY KEY ,
+	Date_admission          DATE NOT NULL ,
+	Date_registration       DATE NOT NULL ,
+	Status               VARCHAR2(20) NOT NULL ,
+	id_service               INTEGER NOT NULL REFERENCES Service (id_service)
+);
+
+
+
+
+CREATE TABLE Employee
+(
+	id_emp              INTEGER PRIMARY KEY ,
+	Department            VARCHAR2(20) NULL ,
+	Post                CHAR(18) NULL ,
+	id_mfc               INTEGER NOT NULL REFERENCES MFC (id_mfc)
+	FOREIGN KEY (id_emp) REFERENCES Person (id) ON DELETE CASCADE
+);
+
+
+
+
+CREATE TABLE Employee_Service
+(
+	id_emp              INTEGER NOT NULL ,
+	id_reg              INTEGER NOT NULL ,
+	PRIMARY KEY (id_emp, id_reg) ,
+	FOREIGN KEY (id_emp) REFERENCES Employee (id_emp) ,
+	FOREIGN KEY (id_reg) REFERENCES Registration (id_reg)
+);
+
+
+
+
+CREATE TABLE Service
+(
+	id_service               INTEGER PRIMARY KEY ,
+	description             VARCHAR2(20) NULL
+);
+
+
+
+
+CREATE TABLE Service_Document
+(
+	id_service               INTEGER NOT NULL ,
+	id_doc               INTEGER NOT NULL ,
+	PRIMARY KEY (id_service, id_doc) ,
+	FOREIGN KEY (id_service) REFERENCES Service (id_service) ,
+	FOREIGN KEY (id_doc) REFERENCES Document (id_doc)
+);
+
+
+
+
+CREATE TABLE Applicant_MFC
+(
+	id_app               INTEGER NOT NULL ,
+	id_mfc               INTEGER NOT NULL ,
+	PRIMARY KEY (id_app, id_mfc) ,
+	FOREIGN KEY (id_app) REFERENCES Applicant (id_app) ,
+	FOREIGN KEY (id_mfc) REFERENCES MFC (id_mfc)
+);
