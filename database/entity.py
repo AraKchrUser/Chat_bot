@@ -2,7 +2,7 @@ import datetime
 import sqlalchemy
 from db_session import SqlAlchemyBase
 
-
+# Slot filling
 class User(SqlAlchemyBase):
     __tablename__ = 'Lusers'
 
