@@ -2,8 +2,13 @@ from telegram.ext import Updater, Filters, MessageHandler
 from telegram.ext import CallbackContext, CommandHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 import map_api
-TOKEN = ""
-# Next in this file will be work with postgresql and passport scan
+from passporteye import read_mrz  # Машиночитаемая зона паспорта для регистрации в базе данных
+
+
+with open('../../../token_teleg') as token_file:
+    TOKEN = token_file.read().strip()
+
+# Реализовать конечный автомат
 
 
 def start(update, context):
