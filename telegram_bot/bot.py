@@ -2,7 +2,7 @@ from telegram.ext import Updater, Filters, MessageHandler
 from telegram.ext import CallbackContext, CommandHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 import map_api
-from passporteye import read_mrz  # Машиночитаемая зона паспорта для регистрации в базе данных
+from passporteye import read_mrz  # Машиночитаемая зона паспорта для регистрации в базе данных (благодарность на гитхабе)
 
 
 with open('../../../token_teleg') as token_file:

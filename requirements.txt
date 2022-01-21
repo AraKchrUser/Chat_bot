@@ -1,3 +1,5 @@
 SQLAlchemy==1.4.29
 requests==2.22.0
 python-telegram-bot==13.10
+jupyter
+fasttext-wheel
