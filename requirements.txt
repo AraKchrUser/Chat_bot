@@ -3,3 +3,6 @@ requests==2.22.0
 python-telegram-bot==13.10
 jupyter
 fasttext-wheel
+deeppavlov~=0.17.2
+beautifulsoup4
+psycopg2-binary
