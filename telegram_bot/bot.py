@@ -5,7 +5,7 @@ import map_api
 from passporteye import read_mrz  # Машиночитаемая зона паспорта для регистрации в базе данных (благодарность на гитхабе)
 
 
-with open('../../../token_teleg') as token_file:
+with open('../../token_teleg') as token_file:
     TOKEN = token_file.read().strip()
 
 # Реализовать конечный автомат

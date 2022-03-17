@@ -5,9 +5,9 @@ from db_session import SqlAlchemyBase
 
 
 class FAQ(SqlAlchemyBase):
+    # Вопрос-ответ
     __tablename__ = 'faq'
 
-    id_mfc = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('mfc.id_mfc'), nullable=False)
     id_qu = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     question = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     answer = sqlalchemy.Column(sqlalchemy.String, nullable=False)
@@ -21,12 +21,17 @@ class Document(SqlAlchemyBase):
 
 
 class Applicant(SqlAlchemyBase):
+    # Заявитель
     __tablename__ = 'applicant'
 
-    id_app = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('person.id'),  primary_key=True)
-    chat_id = sqlalchemy.Column(sqlalchemy.String, nullable=False, unique=True)  # можно установить id чата
+    id_app = sqlalchemy.Column(sqlalchemy.Integer, autoincrement=True,  primary_key=True)
+    chat_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)  # можно установить id чата
     photo = sqlalchemy.Column(sqlalchemy.LargeBinary, nullable=True)
     verified = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False)
+    second_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    first_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    passport = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    gender = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
 
 class Service_Mfc(SqlAlchemyBase):
@@ -44,6 +49,7 @@ class Applicant_Service(SqlAlchemyBase):
 
 
 class MFC(SqlAlchemyBase):
+    # МФЦ
     __tablename__ = 'mfc'
 
     id_mfc = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
@@ -55,28 +61,29 @@ class MFC(SqlAlchemyBase):
     social_ref = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
 
-class New(SqlAlchemyBase):
-    __tablename__ = 'new'
+# class New(SqlAlchemyBase):
+#     __tablename__ = 'new'
+#
+#     id_new = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
+#     id_mfc = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('mfc.id_mfc'), nullable=False)
+#     content = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+#     date_publ = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
+#     relevance = sqlalchemy.Column(sqlalchemy.Boolean, default=True)
+#     source = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
-    id_new = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    id_mfc = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('mfc.id_mfc'), nullable=False)
-    content = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    date_publ = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
-    relevance = sqlalchemy.Column(sqlalchemy.Boolean, default=True)
-    source = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
-
-class Person(SqlAlchemyBase):
-    __tablename__ = 'person'
-
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    second_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    first_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    passport = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    gender = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+# class Person(SqlAlchemyBase):
+#     __tablename__ = 'person'
+#
+#     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
+#     second_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+#     first_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+#     passport = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+#     gender = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
 
 class Registration(SqlAlchemyBase):
+    # Запись на услугу
     __tablename__ = 'registration'
 
     id_reg = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
@@ -87,12 +94,17 @@ class Registration(SqlAlchemyBase):
 
 
 class Employee(SqlAlchemyBase):
+    # Сотрудник
     __tablename__ = 'employee'
 
-    id_emp = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('person.id'),  primary_key=True)
+    id_emp = sqlalchemy.Column(sqlalchemy.Integer, autoincrement=True,  primary_key=True)
     department = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     post = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     id_mfc = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('mfc.id_mfc'), nullable=False)
+    second_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    first_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    passport = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    gender = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
 
 class EmployeeService(SqlAlchemyBase):
