@@ -34,18 +34,18 @@ class Applicant(SqlAlchemyBase):
     gender = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
 
-class Service_Mfc(SqlAlchemyBase):
-    __tablename__ = 'service_mfc'
+# class Service_Mfc(SqlAlchemyBase):
+#     __tablename__ = 'service_mfc'
+#
+#     id_reg = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('registration.id_reg'), primary_key=True)
+#     id_mfc = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('mfc.id_mfc'), primary_key=True)
 
-    id_reg = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('registration.id_reg'), primary_key=True)
-    id_mfc = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('mfc.id_mfc'), primary_key=True)
 
-
-class Applicant_Service(SqlAlchemyBase):
-    __tablename__ = 'applicant_service'
-
-    id_app = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('applicant.id_app'), primary_key=True)
-    id_reg = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('registration.id_reg'), primary_key=True)
+# class Applicant_Service(SqlAlchemyBase):
+#     __tablename__ = 'applicant_service'
+#
+#     id_app = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('applicant.id_app'), primary_key=True)
+#     id_reg = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('registration.id_reg'), primary_key=True)
 
 
 class MFC(SqlAlchemyBase):
@@ -91,6 +91,9 @@ class Registration(SqlAlchemyBase):
     date_admission = sqlalchemy.Column(sqlalchemy.DateTime)
     status = sqlalchemy.Column(sqlalchemy.Boolean, default=True)  # Конечное число состояний заявок
     id_service = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('service.id_service'), nullable=False)
+    id_emp = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('employee.id_emp'), nullable=False)
+    id_mfc = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('mfc.id_mfc'), nullable=False)
+    id_app = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('applicant.id_app'), nullable=False)
 
 
 class Employee(SqlAlchemyBase):
@@ -107,11 +110,11 @@ class Employee(SqlAlchemyBase):
     gender = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
 
-class EmployeeService(SqlAlchemyBase):
-    __tablename__ = 'employee_service'
-
-    id_emp = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('employee.id_emp'), primary_key=True)
-    id_reg = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('registration.id_reg'), primary_key=True)
+# class EmployeeService(SqlAlchemyBase):
+#     __tablename__ = 'employee_service'
+#
+#     id_emp = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('employee.id_emp'), primary_key=True)
+#     id_reg = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('registration.id_reg'), primary_key=True)
 
 
 class Service(SqlAlchemyBase):

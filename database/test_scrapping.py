@@ -3,9 +3,32 @@ import requests
 import time
 import pandas as pd
 import logging
+from pprint import pprint
 
 
-def get_data():
+def get_sirvices():
+    target = []
+    service = []
+    dict_data = {
+        "Жилищные услуги": [1, 2, 3],
+        "Социальные услуги": [1, 2, 3],
+        "Справки и выписки": [1, 2, 3],
+        "Семья и дети": [1, 2, 3],
+        "Транспорт и вождение": [1, 2, 3],
+        "Здоровье": [1, 2, 3],
+        "Прописка и гражданство": [1, 2, 3],
+        "Паспорт РФ и загранпаспорт": [1, 2, 3],
+        "ИНН и СНИЛС": [1, 2, 3],
+        "Налоги и бизнес": [1, 2, 3],
+        "Разрешения и лицензии": [1, 2, 3]
+    }
+    for k, v in dict_data.items():
+        target.extend([k] * len(v))
+        service.extend(v)
+    return target, service
+
+
+def get_data_faq():
     url = "https://mfc-amur.ru/faq/?PAGEN_1="
     page_id = 1
     question = []
@@ -32,12 +55,22 @@ def get_data():
 
 
 if __name__ == "__main__":
-    # question, answer = get_data()
+    # question, answer = get_data_faq()
     # pd.DataFrame({'question': question, 'answer': answer}).to_csv('FAQ.csv')
     # url = "https://mfc-amur.ru/faq/693244/"
     # page = requests.get(url)
     # soup = bs4.BeautifulSoup(page.content, 'html.parser')
     # print(soup.find(class_="news-detail__detail-text").text)
-    df = pd.read_csv('FAQ.csv')
-    print(df.info())
-    print(df.dropna())
+    # df = pd.read_csv('FAQ.csv')
+    # print(df.info())
+    # print(df.dropna())
+    # for i, j in zip(*get_sirvices()):
+    #     print(i, j)
+    url = "https://mfc-spravka.ru/uslugi-mfc.html"
+    page = requests.get(url)
+    soup = bs4.BeautifulSoup(page.content, 'html.parser')
+    pprint([[tag.get_text() for tag in child.find_all('a')] for child in soup.find_all("tbody")])
+    pprint(soup.find(id="content"))
+    pass
+
+

@@ -8,7 +8,7 @@ import pandas as pd
 db_session.global_init("postgre1")
 db_sess = db_session.create_session()
 
-# Регисртрация заявителя
+# # Регисртрация заявителя
 # person = Applicant()
 # person.chat_id = "1"
 # person.verified = True
@@ -49,7 +49,7 @@ db_sess = db_session.create_session()
 # person.first_name = "Asatryan"
 # person.passport = "1020 2345678"
 # person.gender = "M"
-
+#
 # # FAQ
 # for question, answer in zip(pd.read_csv('../database/FAQ.csv')['question'],
 #                             pd.read_csv('../database/FAQ.csv')['answer']):
