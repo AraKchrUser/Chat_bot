@@ -9,18 +9,22 @@ from pprint import pprint
 def get_sirvices():
     target = []
     service = []
+    url = "https://mfc-spravka.ru/uslugi-mfc.html"
+    page = requests.get(url)
+    soup = bs4.BeautifulSoup(page.content, 'html.parser')
+    service_list = [[tag.get_text() for tag in child.find_all('a')] for child in soup.find_all("tbody")]
     dict_data = {
-        "Жилищные услуги": [1, 2, 3],
-        "Социальные услуги": [1, 2, 3],
-        "Справки и выписки": [1, 2, 3],
-        "Семья и дети": [1, 2, 3],
-        "Транспорт и вождение": [1, 2, 3],
-        "Здоровье": [1, 2, 3],
-        "Прописка и гражданство": [1, 2, 3],
-        "Паспорт РФ и загранпаспорт": [1, 2, 3],
-        "ИНН и СНИЛС": [1, 2, 3],
-        "Налоги и бизнес": [1, 2, 3],
-        "Разрешения и лицензии": [1, 2, 3]
+        "Жилищные услуги": service_list[0],
+        "Справки и выписки": service_list[2],
+        "Семья и дети": service_list[3],
+        "Социальные услуги": service_list[4],
+        "Транспорт и вождение": service_list[5],
+        "Здоровье": service_list[6],
+        "Прописка и гражданство": service_list[7],
+        "Паспорт РФ и загранпаспорт": service_list[8],
+        "ИНН и СНИЛС": service_list[9],
+        "Разрешения и лицензии": service_list[10],
+        "Налоги и бизнес": service_list[11]
     }
     for k, v in dict_data.items():
         target.extend([k] * len(v))
@@ -64,13 +68,13 @@ if __name__ == "__main__":
     # df = pd.read_csv('FAQ.csv')
     # print(df.info())
     # print(df.dropna())
-    # for i, j in zip(*get_sirvices()):
-    #     print(i, j)
-    url = "https://mfc-spravka.ru/uslugi-mfc.html"
-    page = requests.get(url)
-    soup = bs4.BeautifulSoup(page.content, 'html.parser')
-    pprint([[tag.get_text() for tag in child.find_all('a')] for child in soup.find_all("tbody")])
-    pprint(soup.find(id="content"))
+    for i, j in zip(*get_sirvices()):
+        print(i, j)
+    # Записать в файл в 3 колонки для faq
+    # url = "https://mfc-spravka.ru/uslugi-mfc.html"
+    # page = requests.get(url)
+    # soup = bs4.BeautifulSoup(page.content, 'html.parser')
+    # pprint([[tag.get_text() for tag in child.find_all('a')] for child in soup.find_all("tbody")])
     pass
 
 
