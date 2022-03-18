@@ -59,19 +59,25 @@ db_sess = db_session.create_session()
 #     db_sess.add(faq)
 #     db_sess.commit()
 
-# Сервисы
+# # Сервисы, необходимо
+# for q, a, d in zip(pd.read_csv('QAService.csv')['answer1'],
+#                        pd.read_csv('QAService.csv')['answer0'], pd.read_csv('QAService.csv')['docs']):
+#     ser = Service()
+#     ser.description = q + ', ' + a
+#     ser.documents = d
+#     db_sess.add(ser)
+#     db_sess.commit()
 
-
-# Регистрация на прием
+# # Регистрация на прием
 # registr = Registration()
 # registr.date_registration = datetime.now()
 # registr.date_admission = datetime.combine(date(2022, 7, 14), time(12, 30))
 # registr.status = True
 # registr.id_service
+# registr.id_emp
+# registr.id_mfc
+# registr.id_app
 
-# Выбор услуги
-# Выбор документов для услуги
-#
 
 # print(db_sess.query(MFC).filter(MFC.address == "Центральная ул., 37, село Чигири").first().id_mfc)
 

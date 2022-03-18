@@ -13,11 +13,11 @@ class FAQ(SqlAlchemyBase):
     answer = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
 
-class Document(SqlAlchemyBase):
-    __tablename__ = 'document'
-
-    id_doc = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+# class Document(SqlAlchemyBase):
+#     __tablename__ = 'document'
+#
+#     id_doc = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
+#     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
 
 class Applicant(SqlAlchemyBase):
@@ -122,13 +122,14 @@ class Service(SqlAlchemyBase):
 
     id_service = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     description = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    documents = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
 
-class ServiceDocument(SqlAlchemyBase):
-    __tablename__ = 'service_document'
-
-    id_service = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('service.id_service'), primary_key=True)
-    id_doc = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('document.id_doc'), primary_key=True)
+# class ServiceDocument(SqlAlchemyBase):
+#     __tablename__ = 'service_document'
+#
+#     id_service = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('service.id_service'), primary_key=True)
+#     id_doc = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('document.id_doc'), primary_key=True)
 
 
 class ApplicationMFC(SqlAlchemyBase):

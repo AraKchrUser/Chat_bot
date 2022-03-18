@@ -9,6 +9,7 @@ from pprint import pprint
 def get_sirvices():
     target = []
     service = []
+    refs = []
     url = "https://mfc-spravka.ru/uslugi-mfc.html"
     page = requests.get(url)
     soup = bs4.BeautifulSoup(page.content, 'html.parser')
@@ -26,10 +27,20 @@ def get_sirvices():
         "Разрешения и лицензии": service_list[10],
         "Налоги и бизнес": service_list[11]
     }
-    for k, v in dict_data.items():
+
+    url = "https://mfc-spravka.ru/uslugi-mfc.html"
+    page = requests.get(url)
+    soup = bs4.BeautifulSoup(page.content, 'html.parser')
+    ref = [[tag['href'] for tag in child.find_all('a')] for child in soup.find_all("tbody")]
+
+    for k, v, in dict_data.items():
         target.extend([k] * len(v))
         service.extend(v)
-    return target, service
+
+    for i in [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
+        refs.extend(ref[i])
+
+    return target, target, service, refs
 
 
 def get_data_faq():
@@ -68,13 +79,20 @@ if __name__ == "__main__":
     # df = pd.read_csv('FAQ.csv')
     # print(df.info())
     # print(df.dropna())
-    for i, j in zip(*get_sirvices()):
-        print(i, j)
+    # for i, r in zip(*get_sirvices()):
+    #     print(i, r)
+    target, target, service, refs = get_sirvices()
+    print(len(refs))
+    pd.DataFrame({'question': target, 'answer0': target, 'answer1': service, 'docs': refs}).to_csv('QAService.csv')
     # Записать в файл в 3 колонки для faq
     # url = "https://mfc-spravka.ru/uslugi-mfc.html"
     # page = requests.get(url)
     # soup = bs4.BeautifulSoup(page.content, 'html.parser')
     # pprint([[tag.get_text() for tag in child.find_all('a')] for child in soup.find_all("tbody")])
+    # url = "https://mfc-spravka.ru/uslugi-mfc.html"
+    # page = requests.get(url)
+    # soup = bs4.BeautifulSoup(page.content, 'html.parser')
+    # pprint([[tag['href'] for tag in child.find_all('a')] for child in soup.find_all("tbody")])
     pass
 
 
