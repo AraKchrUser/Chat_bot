@@ -118,6 +118,7 @@ class Employee(SqlAlchemyBase):
 
 
 class Service(SqlAlchemyBase):
+    # Услуга
     __tablename__ = 'service'
 
     id_service = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
@@ -133,6 +134,7 @@ class Service(SqlAlchemyBase):
 
 
 class ApplicationMFC(SqlAlchemyBase):
+    # Заявитель-МФЦ
     __tablename__ = 'applicant_mfc'
 
     id_app = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('applicant.id_app'), primary_key=True)

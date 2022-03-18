@@ -81,9 +81,9 @@ if __name__ == "__main__":
     # print(df.dropna())
     # for i, r in zip(*get_sirvices()):
     #     print(i, r)
-    target, target, service, refs = get_sirvices()
-    print(len(refs))
-    pd.DataFrame({'question': target, 'answer0': target, 'answer1': service, 'docs': refs}).to_csv('QAService.csv')
+    # target, target, service, refs = get_sirvices()
+    # print(len(refs))
+    # pd.DataFrame({'question': target, 'answer0': target, 'answer1': service, 'docs': refs}).to_csv('QAService.csv')
     # Записать в файл в 3 колонки для faq
     # url = "https://mfc-spravka.ru/uslugi-mfc.html"
     # page = requests.get(url)
