@@ -1,6 +1,7 @@
 import datetime
 import sqlalchemy
-from db_session import SqlAlchemyBase
+from .db_session import SqlAlchemyBase
+
 #  Генерация Базы Данных с использованием ORM и взаимодействие с ней
 
 
