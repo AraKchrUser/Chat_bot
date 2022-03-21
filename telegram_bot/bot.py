@@ -1,5 +1,6 @@
+import telegram
 from telegram.ext import Updater, Filters, MessageHandler, ConversationHandler
-from telegram.ext import CallbackContext, CommandHandler
+from telegram.ext import CallbackContext, CommandHandler, CallbackQueryHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 import telegram_bot.map_api as map_api
 import pandas as pd
@@ -15,7 +16,8 @@ from deeppavlov.core.common.file import read_json
 from deeppavlov.core.commands.infer import build_model
 from deeppavlov import configs, train_model
 import logging
-from passporteye import read_mrz  # Машиночитаемая зона паспорта для регистрации в базе данных (благодарность на гитхабе)
+from passporteye import \
+    read_mrz  # Машиночитаемая зона паспорта для регистрации в базе данных (благодарность на гитхабе)
 
 logging.basicConfig(level=logging.ERROR)
 global_init("postgre1")
@@ -25,13 +27,16 @@ with open('../../token_teleg') as token_file:
 
 def start(update, context):
     update.message.reply_text(
-        "I am echo-bot",
+        "Я чат-бот 🤖, который поможет тебе определить твою проблему и предложить услугу МФЦ. При желании, после того" \
+        " как ты зарегистрируешься, можешь записаться на прием, я тебе поставлю напоминалку 😉 ✅",
         reply_markup=markup
     )
 
 
 def help(update, context):
-    update.message.reply_text("I am can't help you")
+    update.message.reply_text("Я чат-бот 🤖, который поможет тебе определить твою проблему и предложить услугу МФЦ."
+                              " При желании, после того"
+                              " как ты зарегистрируешься, можешь записаться на прием, я тебе поставлю напоминалку 😉 ✅")
 
 
 def echo(update, context):
@@ -39,6 +44,16 @@ def echo(update, context):
 
 
 def faq(update, context):
+    question = ' '.join(context.args)
+    faq = Faq(faq_write.faq_write())
+    # faq = Faq('../FAQ/data_faq_mfc.csv')
+    faq.train()
+    answer = faq.infer(question)[0][0]
+    update.message.reply_text(answer)
+
+
+def define_service(update, context):
+    # Функция определния сервиса, необходимого для определния услуги
     question = ' '.join(context.args)
     faq = Faq(faq_write.faq_write())
     # faq = Faq('../FAQ/data_faq_mfc.csv')
@@ -58,7 +73,7 @@ def news(update, context):
 def close(update, context):
     update.message.reply_text('ok', reply_markup=ReplyKeyboardRemove())
 
-
+# Установка напоминания
 def remove_job(name, context):
     current_job = context.job_queue.get_jobs_by_name(name)
     if not current_job:
@@ -97,49 +112,113 @@ def unset_timer(update, context):
     update.message.reply_text(text)
 
 
-def stop():
+#  Работа с обработчиками
+def stop(update, context):
     # Conversion END
     return ConversationHandler.END
 
 
 def registration(update, context):
-    update.message.reply_text("registration")
+    keyboard = telegram.InlineKeyboardMarkup([
+        [telegram.InlineKeyboardButton(text='Да', callback_data='Да'),
+         telegram.InlineKeyboardButton(text='Нет', callback_data='Нет')]
+    ])
+    update.message.reply_text('Начать процесс регистрации?',
+                              reply_markup=keyboard)
     return 1
 
 
-def set_first_name(update, context):
-    update.message.reply_text('first' + update.message.text)
+def agreement(update, context):
+    query = update.callback_query
+    query.answer('Введите свое имя')
+    query.edit_message_text(text='Введите свое имя')
     return 2
 
 
-def set_second_name(update, context):
-    update.message.reply_text('second' + update.message.text)
-    return 3
-
-
-def set_passport():
-    return 4
-
-
-def set_gender():
-    return 5
-
-
-def add_user():
-    # add user in db
+def disagreement(update, context):
+    query = update.callback_query
+    query.edit_message_text(text='Регистрация отменена')
     return ConversationHandler.END
 
 
-# Реализовать конечный автомат
+def set_first_name(update, context):
+    update.message.reply_text(f'Хорошо, {update.message.text}, теперь введите свою фамилию')
+    return 3
+
+
+def set_second_name(update, context):
+    update.message.reply_text('Для регистрации необходимы Ваши паспортные данные ... ')
+    return 5
+
+
+def set_passport(update, context):
+    pass
+
+
+def gender(update, context):
+    # Инвайт кнопка
+    keyboard = telegram.InlineKeyboardMarkup([
+        [telegram.InlineKeyboardButton(text='👧', callback_data='👧'),
+         telegram.InlineKeyboardButton(text='👨', callback_data='👨')]
+    ])
+    update.message.reply_text('Выбери свой пол ',
+                              reply_markup=keyboard)
+    return 5
+
+
+def set_girl(update, context):
+    query = update.callback_query
+    query.answer('👧')
+
+    keyboard = telegram.InlineKeyboardMarkup([
+        [telegram.InlineKeyboardButton(text='Сохранить', callback_data='Сохранить'),
+         telegram.InlineKeyboardButton(text='Отмена', callback_data='Отмена')]
+    ])
+    query.edit_message_text('Сохранить изменения? ',
+                            reply_markup=keyboard)
+    return 7
+
+
+def set_man(update, context):
+    query = update.callback_query
+    query.answer('👨')
+
+    keyboard = telegram.InlineKeyboardMarkup([
+        [telegram.InlineKeyboardButton(text='Сохранить', callback_data='Сохранить'),
+         telegram.InlineKeyboardButton(text='Отмена', callback_data='Отмена')]
+    ])
+    query.edit_message_text('Сохранить изменения? ',
+                            reply_markup=keyboard)
+    return 7
+
+
+def save_changes(update, context):
+    # add user in db
+    query = update.callback_query
+    query.edit_message_text(text='Регистрация завершена')
+    return ConversationHandler.END
+
+
+# Реализовать конечный автомат с передачей данных между состяниями
 registration_handler = ConversationHandler(
     # Регистрация человка (можно добавить и удаление)
     entry_points=[CommandHandler('registration', registration)],
     states={
-        1: [MessageHandler(Filters.text, set_first_name)],
-        2: [MessageHandler(Filters.text, set_second_name)],
-        3: [MessageHandler(Filters.text, set_passport)],
-        4: [MessageHandler(Filters.text, set_gender)],
-        5: [MessageHandler(Filters.text, add_user)],
+        1: [MessageHandler(Filters.text & ~Filters.command, registration),
+            CallbackQueryHandler(agreement, pattern='Да'),
+            CallbackQueryHandler(disagreement, pattern='Нет')
+            ],
+        2: [MessageHandler(Filters.text & ~Filters.command, set_first_name),
+            CallbackQueryHandler(agreement, pattern='Да'),
+            CallbackQueryHandler(disagreement, pattern=' Нет')
+            ],
+        3: [MessageHandler(Filters.text & ~Filters.command, set_second_name)],
+        4: [MessageHandler(Filters.text & ~Filters.command, set_passport)],
+        5: [MessageHandler(Filters.text & ~Filters.command, gender),
+            CallbackQueryHandler(set_girl, pattern='^' + '👧' + '$'),
+            CallbackQueryHandler(set_man, pattern='^' + '👨' + '$')],
+        7: [CallbackQueryHandler(disagreement, pattern='Отмена'),
+            CallbackQueryHandler(save_changes, pattern='Сохранить')],
 
     },
     fallbacks=[CommandHandler('stop', stop)]
@@ -171,10 +250,10 @@ def set_admission_date():
 admission_handler = ConversationHandler(
     entry_points=[CommandHandler('admission', admission)],
     states={
-        1: [MessageHandler(Filters.text, define_city)],
-        2: [MessageHandler(Filters.text, define_service)],
-        3: [MessageHandler(Filters.text, define_mfc)],
-        4: [MessageHandler(Filters.text, set_admission_date)]
+        1: [MessageHandler(Filters.text & ~Filters.command, define_city)],
+        2: [MessageHandler(Filters.text & ~Filters.command, define_service)],
+        3: [MessageHandler(Filters.text & ~Filters.command, define_mfc)],
+        4: [MessageHandler(Filters.text & ~Filters.command, set_admission_date)]
     },
     fallbacks=[CommandHandler('stop', stop)]
 )
