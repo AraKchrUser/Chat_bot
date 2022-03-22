@@ -231,7 +231,7 @@ registration_handler = ConversationHandler(
             CallbackQueryHandler(save_changes, pattern='Сохранить', pass_user_data=True)],
 
     },
-    fallbacks=[CommandHandler('stop', stop)]
+    fallbacks=[CommandHandler('end', stop)]
 )
 
 
@@ -333,7 +333,7 @@ admission_handler = ConversationHandler(
             MessageHandler(Filters.text & ~Filters.command, set_admission_date, pass_user_data=True)
         ]
     },
-    fallbacks=[CommandHandler('stop', stop)]
+    fallbacks=[CommandHandler('end', stop)]
 )
 
 
@@ -362,7 +362,7 @@ def main():
 
 
 if __name__ == "__main__":
-    reply_keyboard = [['/faq', '/registration']]
+    reply_keyboard = [['/admission', '/registration']]
     markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False, resize_keyboard=True)
 
     main()
