@@ -237,22 +237,44 @@ registration_handler = ConversationHandler(
 
 def admission(update, context):
     # Вывести список Городов Амурской области
+    keyboard = telegram.InlineKeyboardMarkup([
+        [telegram.InlineKeyboardButton(text='Благовещенск 🌆', callback_data='Благовещенск'),
+         telegram.InlineKeyboardButton(text='Шимановск 🌇', callback_data='Шимановск')],
+        [telegram.InlineKeyboardButton(text='Свободный 🏙️', callback_data='Свободный'),
+         telegram.InlineKeyboardButton(text='Белогорск 🌌', callback_data='Белогорск')]
+    ])
+    update.message.reply_text('Выбери город Амурской области, где хочешь записаться ',
+                              reply_markup=keyboard)
     return 1
 
 
 def define_city(update, context):
-    # Установить город и узнать какой вопрос беспокоит
+    query = update.callback_query
+    query.edit_message_text(f'Вы выбрали {query.data}\nТеперь пишите Вашу проблему')
     return 2
 
 
 def define_service(update, context):
     # Установить услугу и узнать, по какому адресу предоставить услугу
-    update.message.reply_text('second' + update.message.text)
+    update.message.reply_text('update.message.text + Дурачок, Выбери МФЦ')
+    db_sess = create_session()
+
+    keyboard = telegram.InlineKeyboardMarkup([[telegram.InlineKeyboardButton(
+        text=mfc.address,
+        callback_data=mfc.address
+    )] for mfc in db_sess.query(MFC).all()])
+    update.message.reply_text('Выбери адрес, где тебе удобнее всего ',
+                              reply_markup=keyboard)
+    return 2
+
+
+def set_mfc(update, context):
+    query = update.callback_query
+    query.edit_message_text(query.data)
     return 3
 
 
-def define_mfc(update, context):
-    # Установить МФЦ и вывести календарь
+def calendar_init(update, context):
     calendar, step = DetailedTelegramCalendar().build()
     update.message.reply_text(f"Select {LSTEP[step]}", reply_markup=calendar)
     return 3
@@ -267,20 +289,43 @@ def set_calendar_date(update, context):
     query = update.callback_query
     result, key, step = DetailedTelegramCalendar().process(query.data)
     if not result and key:
-        query.edit_message_text(f"Select {LSTEP[step]}", reply_markup=key)
+        query.edit_message_text(f"Выбрано {LSTEP[step]}", reply_markup=key)
     elif result:
-        query.edit_message_text(f"You selected {result}")
+        # ! -------------------------
+        keyboard = telegram.InlineKeyboardMarkup([
+            [telegram.InlineKeyboardButton(text='9:30', callback_data='9:30'),
+             telegram.InlineKeyboardButton(text='10:30', callback_data='10:30'),
+             telegram.InlineKeyboardButton(text='11:30', callback_data='11:30')],
+            [telegram.InlineKeyboardButton(text='13:30', callback_data='13:30'),
+             telegram.InlineKeyboardButton(text='14:30', callback_data='14:30'),
+             telegram.InlineKeyboardButton(text='15:30', callback_data='15:30')]
+        ])
+        query.edit_message_text(f"Вы выбрали дату {result}. Выберите время:", reply_markup=keyboard)
+        return 4
     return 3
+
+
+def set_time(update, context):
+    query = update.callback_query
+    query.edit_message_text(query.data)
+    # Подтверждение записи на услугу
+    return 5
 
 
 admission_handler = ConversationHandler(
     entry_points=[CommandHandler('admission', admission)],
     states={
-        1: [MessageHandler(Filters.text & ~Filters.command, define_city, pass_user_data=True)],
-        2: [MessageHandler(Filters.text & ~Filters.command, define_service, pass_user_data=True)],
-        3: [MessageHandler(Filters.text & ~Filters.command, define_mfc, pass_user_data=True),
+        1: [
+            # MessageHandler(Filters.text & ~Filters.command, define_city, pass_user_data=True),
+            CallbackQueryHandler(define_city, pass_user_data=True)],
+        2: [MessageHandler(Filters.text & ~Filters.command, define_service, pass_user_data=True),
+            CallbackQueryHandler(set_mfc, pass_user_data=True)],
+        3: [MessageHandler(Filters.text & ~Filters.command, calendar_init, pass_user_data=True),
             CallbackQueryHandler(set_calendar_date, pattern=DetailedTelegramCalendar.func, pass_user_data=True)],
-        4: [MessageHandler(Filters.text & ~Filters.command, set_admission_date, pass_user_data=True)]
+        4: [CallbackQueryHandler(set_time, pattern=r'\d\d.\d\d', pass_user_data=True)],
+        5: [
+            MessageHandler(Filters.text & ~Filters.command, set_admission_date, pass_user_data=True)
+        ]
     },
     fallbacks=[CommandHandler('stop', stop)]
 )
