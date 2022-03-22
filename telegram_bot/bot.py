@@ -277,6 +277,11 @@ def set_mfc(update, context):
 def calendar_init(update, context):
     calendar, step = DetailedTelegramCalendar().build()
     if update.message.text.lower() == 'да':
+        context.bot.send_photo(
+            update.message.chat_id,
+            map_api.get_static_api(),
+            caption='Геолокация МФЦ'
+        )
         update.message.reply_text(f"Выберите время приема {LSTEP[step]}", reply_markup=calendar)
     return 3
 
