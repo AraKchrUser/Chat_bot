@@ -3,6 +3,7 @@ from telegram.ext import Updater, Filters, MessageHandler, ConversationHandler
 from telegram.ext import CallbackContext, CommandHandler, CallbackQueryHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 import telegram_bot.map_api as map_api
+from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 import pandas as pd
 from database.entity import *
 from database.db_session import *
@@ -23,11 +24,12 @@ logging.basicConfig(level=logging.ERROR)
 global_init("postgre1")
 with open('../../token_teleg') as token_file:
     TOKEN = token_file.read().strip()
+# user_info = {}
 
 
 def start(update, context):
     update.message.reply_text(
-        "Я чат-бот 🤖, который поможет тебе определить твою проблему и предложить услугу МФЦ. При желании, после того" \
+        "Я чат-бот 🤖, который поможет тебе определить твою проблему и предложить услугу МФЦ. При желании, после того"\
         " как ты зарегистрируешься, можешь записаться на прием, я тебе поставлю напоминалку 😉 ✅",
         reply_markup=markup
     )
@@ -142,11 +144,13 @@ def disagreement(update, context):
 
 
 def set_first_name(update, context):
-    update.message.reply_text(f'Хорошо, {update.message.text}, теперь введите свою фамилию')
+    context.user_data['first_name'] = update.message.text
+    update.message.reply_text(f'Хорошо, {context.user_data["first_name"]}, теперь введите свою фамилию')
     return 3
 
 
 def set_second_name(update, context):
+    context.user_data['second_name'] = update.message.text
     update.message.reply_text('Для регистрации необходимы Ваши паспортные данные ... ')
     return 5
 
@@ -156,6 +160,10 @@ def set_passport(update, context):
 
 
 def gender(update, context):
+    context.user_data['passport'] = update.message.text
+    msg = update.message
+    msg.delete()
+    update.message.reply_text(f'Паспортные данные введены... {context.user_data["passport"]}')
     # Инвайт кнопка
     keyboard = telegram.InlineKeyboardMarkup([
         [telegram.InlineKeyboardButton(text='👧', callback_data='👧'),
@@ -167,6 +175,7 @@ def gender(update, context):
 
 
 def set_girl(update, context):
+    context.user_data['gender'] = 'муж'
     query = update.callback_query
     query.answer('👧')
 
@@ -180,6 +189,7 @@ def set_girl(update, context):
 
 
 def set_man(update, context):
+    context.user_data['gender'] = 'муж'
     query = update.callback_query
     query.answer('👨')
 
@@ -187,7 +197,7 @@ def set_man(update, context):
         [telegram.InlineKeyboardButton(text='Сохранить', callback_data='Сохранить'),
          telegram.InlineKeyboardButton(text='Отмена', callback_data='Отмена')]
     ])
-    query.edit_message_text('Сохранить изменения? ',
+    query.edit_message_text(f'Сохранить изменения? {context.user_data["gender"]}',
                             reply_markup=keyboard)
     return 7
 
@@ -195,7 +205,7 @@ def set_man(update, context):
 def save_changes(update, context):
     # add user in db
     query = update.callback_query
-    query.edit_message_text(text='Регистрация завершена')
+    query.edit_message_text(text=f'Регистрация завершена {[[k, v] for k, v in context.user_data.items()]}')
     return ConversationHandler.END
 
 
@@ -204,21 +214,21 @@ registration_handler = ConversationHandler(
     # Регистрация человка (можно добавить и удаление)
     entry_points=[CommandHandler('registration', registration)],
     states={
-        1: [MessageHandler(Filters.text & ~Filters.command, registration),
-            CallbackQueryHandler(agreement, pattern='Да'),
-            CallbackQueryHandler(disagreement, pattern='Нет')
+        1: [MessageHandler(Filters.text & ~Filters.command, registration, pass_user_data=True),
+            CallbackQueryHandler(agreement, pattern='Да', pass_user_data=True),
+            CallbackQueryHandler(disagreement, pattern='Нет', pass_user_data=True)
             ],
-        2: [MessageHandler(Filters.text & ~Filters.command, set_first_name),
-            CallbackQueryHandler(agreement, pattern='Да'),
-            CallbackQueryHandler(disagreement, pattern=' Нет')
+        2: [MessageHandler(Filters.text & ~Filters.command, set_first_name, pass_user_data=True),
+            CallbackQueryHandler(agreement, pattern='Да', pass_user_data=True),
+            CallbackQueryHandler(disagreement, pattern=' Нет', pass_user_data=True)
             ],
-        3: [MessageHandler(Filters.text & ~Filters.command, set_second_name)],
-        4: [MessageHandler(Filters.text & ~Filters.command, set_passport)],
-        5: [MessageHandler(Filters.text & ~Filters.command, gender),
-            CallbackQueryHandler(set_girl, pattern='^' + '👧' + '$'),
-            CallbackQueryHandler(set_man, pattern='^' + '👨' + '$')],
-        7: [CallbackQueryHandler(disagreement, pattern='Отмена'),
-            CallbackQueryHandler(save_changes, pattern='Сохранить')],
+        3: [MessageHandler(Filters.text & ~Filters.command, set_second_name, pass_user_data=True)],
+        4: [MessageHandler(Filters.text & ~Filters.command, set_passport, pass_user_data=True)],
+        5: [MessageHandler(Filters.text & ~Filters.command, gender, pass_user_data=True),
+            CallbackQueryHandler(set_girl, pattern='^' + '👧' + '$', pass_user_data=True),
+            CallbackQueryHandler(set_man, pattern='^' + '👨' + '$', pass_user_data=True)],
+        7: [CallbackQueryHandler(disagreement, pattern='Отмена', pass_user_data=True),
+            CallbackQueryHandler(save_changes, pattern='Сохранить', pass_user_data=True)],
 
     },
     fallbacks=[CommandHandler('stop', stop)]
@@ -226,34 +236,51 @@ registration_handler = ConversationHandler(
 
 
 def admission(update, context):
+    # Вывести список Городов Амурской области
     return 1
 
 
 def define_city(update, context):
+    # Установить город и узнать какой вопрос беспокоит
     return 2
 
 
 def define_service(update, context):
+    # Установить услугу и узнать, по какому адресу предоставить услугу
     update.message.reply_text('second' + update.message.text)
     return 3
 
 
-def define_mfc():
-    return 4
+def define_mfc(update, context):
+    # Установить МФЦ и вывести календарь
+    calendar, step = DetailedTelegramCalendar().build()
+    update.message.reply_text(f"Select {LSTEP[step]}", reply_markup=calendar)
+    return 3
 
 
-def set_admission_date():
+def set_admission_date(update, context):
     # send map
     return ConversationHandler.END
+
+
+def set_calendar_date(update, context):
+    query = update.callback_query
+    result, key, step = DetailedTelegramCalendar().process(query.data)
+    if not result and key:
+        query.edit_message_text(f"Select {LSTEP[step]}", reply_markup=key)
+    elif result:
+        query.edit_message_text(f"You selected {result}")
+    return 3
 
 
 admission_handler = ConversationHandler(
     entry_points=[CommandHandler('admission', admission)],
     states={
-        1: [MessageHandler(Filters.text & ~Filters.command, define_city)],
-        2: [MessageHandler(Filters.text & ~Filters.command, define_service)],
-        3: [MessageHandler(Filters.text & ~Filters.command, define_mfc)],
-        4: [MessageHandler(Filters.text & ~Filters.command, set_admission_date)]
+        1: [MessageHandler(Filters.text & ~Filters.command, define_city, pass_user_data=True)],
+        2: [MessageHandler(Filters.text & ~Filters.command, define_service, pass_user_data=True)],
+        3: [MessageHandler(Filters.text & ~Filters.command, define_mfc, pass_user_data=True),
+            CallbackQueryHandler(set_calendar_date, pattern=DetailedTelegramCalendar.func, pass_user_data=True)],
+        4: [MessageHandler(Filters.text & ~Filters.command, set_admission_date, pass_user_data=True)]
     },
     fallbacks=[CommandHandler('stop', stop)]
 )
