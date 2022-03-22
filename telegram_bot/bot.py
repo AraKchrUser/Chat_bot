@@ -256,7 +256,7 @@ def define_city(update, context):
 
 def define_service(update, context):
     # Установить услугу и узнать, по какому адресу предоставить услугу
-    update.message.reply_text('update.message.text + Дурачок, Выбери МФЦ')
+    update.message.reply_text('Теперь выбери МФЦ')
     db_sess = create_session()
 
     keyboard = telegram.InlineKeyboardMarkup([[telegram.InlineKeyboardButton(
@@ -270,13 +270,14 @@ def define_service(update, context):
 
 def set_mfc(update, context):
     query = update.callback_query
-    query.edit_message_text(query.data)
+    query.edit_message_text('МФЦ выбрана ' + ' ✅.\nВыбрать дату приема?')
     return 3
 
 
 def calendar_init(update, context):
     calendar, step = DetailedTelegramCalendar().build()
-    update.message.reply_text(f"Select {LSTEP[step]}", reply_markup=calendar)
+    if update.message.text.lower() == 'да':
+        update.message.reply_text(f"Выберите время приема {LSTEP[step]}", reply_markup=calendar)
     return 3
 
 
@@ -356,7 +357,7 @@ def main():
 
 
 if __name__ == "__main__":
-    reply_keyboard = [['/faq', '/news'], ['/registration']]
+    reply_keyboard = [['/faq', '/registration']]
     markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False, resize_keyboard=True)
 
     main()
