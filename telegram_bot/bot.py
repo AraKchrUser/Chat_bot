@@ -10,13 +10,9 @@ from database.db_session import *
 import csv
 import faq_write
 from FAQ.model import Faq
-import numpy as np
-import deeppavlov
-from deeppavlov import configs
-from deeppavlov.core.common.file import read_json
-from deeppavlov.core.commands.infer import build_model
-from deeppavlov import configs, train_model
+from datetime import datetime, date, time
 import logging
+import random
 from passporteye import \
     read_mrz  # Машиночитаемая зона паспорта для регистрации в базе данных (благодарность на гитхабе)
 
@@ -98,16 +94,26 @@ def set_timer(update, context):
     chat_id = context.user_data['chat_id']
     try:
         due = int(context.args[0])  # секунды таймера
+        delta = int(context.args[1])  # выбранный интервал
+        srv_id = int(context.args[2])  # номер услуги
         if due < 0:
-            return 0
-        job_removed = remove_job(str(chat_id), context)
-        context.job_queue.run_once(task, due, context=chat_id, name=str(chat_id))
-        text = f"Вернусь через {due} секунд"
-        if job_removed:
-            text += ' Старая задача удалена'
+            due = 0
+        if delta == 'с':
+            due = due
+        elif delta == 'м':
+            due = 60 * due
+        elif delta == 'ч':
+            due = 60 * 60 * due
+        elif delta == 'д':
+            due = 24 * 60 * 60 * due
+        # job_removed = remove_job(str(chat_id), context)
+        context.job_queue.run_once(task, due, context=[chat_id, srv_id], name=str(chat_id))
+        text = f"Напоминание выставлено😉😉😉😉"
+        # if job_removed:
+        #     text += ' Старая задача удалена'
         update.message.reply_text(text)
     except (IndexError, ValueError):
-        update.message.reply_text('Использование: /set <сек>')
+        update.message.reply_text('Использование: /set <с/м/ч/д> <номер услуги>')
 
 
 def unset_timer(update, context):
@@ -119,7 +125,7 @@ def unset_timer(update, context):
 
 #  Работа с обработчиками
 def stop(update, context):
-    update.message.reply_text('Вы отменили процесс')
+    update.message.reply_text('Вы завершили процесс')
     return ConversationHandler.END
 
 
@@ -128,12 +134,27 @@ def registration(update, context):
         [telegram.InlineKeyboardButton(text='Да', callback_data='Да'),
          telegram.InlineKeyboardButton(text='Нет', callback_data='Нет')]
     ])
+
+    db_session = create_session()
+    usr = db_session.query(Applicant).filter(Applicant.chat_id == str(context.user_data['chat_id'])).first()
+    if usr:
+        update.message.reply_text(f'У вас есть аккаунт, {usr.second_name}. Если Вы согласитесь, то он будет удален')
+
+
     update.message.reply_text('Начать процесс регистрации?',
                               reply_markup=keyboard)
+
     return 1
 
 
 def agreement(update, context):
+    # Удаляем старого юзера
+    db_session = create_session()
+    usr = db_session.query(Applicant).filter(Applicant.chat_id == str(context.user_data['chat_id'])).first()
+    if usr:
+        db_session.delete(usr)
+        db_session.commit()
+
     query = update.callback_query
     query.answer('Введите свое имя')
     query.edit_message_text(text='Введите свое имя')
@@ -264,19 +285,22 @@ def admission(update, context):
 
 def define_city(update, context):
     query = update.callback_query
+    context.user_data['city'] = query.data
+    context.user_data['province'] = 'Амурская область'
     query.edit_message_text(f'Вы выбрали {query.data}\nТеперь пишите Вашу проблему')
     return 2
 
 
 def define_service(update, context):
-    # Установить услугу и узнать, по какому адресу предоставить услугу
+    # Установить услугу и узнать, по какому адресу предоставить услугу!!!!!!!!!!!
+    context.user_data['service'] = 'Регистрация ИП, Налоги и бизнес'
     update.message.reply_text('Теперь выбери МФЦ')
     db_sess = create_session()
 
     keyboard = telegram.InlineKeyboardMarkup([[telegram.InlineKeyboardButton(
         text=mfc.address,
         callback_data=mfc.address
-    )] for mfc in db_sess.query(MFC).all()])
+    )] for mfc in db_sess.query(MFC).filter(MFC.city == context.user_data['city']).all()])
     update.message.reply_text('Выбери адрес, где тебе удобнее всего ',
                               reply_markup=keyboard)
     return 2
@@ -284,19 +308,23 @@ def define_service(update, context):
 
 def set_mfc(update, context):
     query = update.callback_query
+    context.user_data['address'] = query.data
     query.edit_message_text('МФЦ выбрана ' + ' ✅.\nВыбрать дату приема?')
     return 3
 
 
 def calendar_init(update, context):
     calendar, step = DetailedTelegramCalendar().build()
-    if update.message.text.lower() == 'да':
+    if 'да' in update.message.text.lower() \
+            or 'конечно' in update.message.text.lower() \
+            or 'ок' in update.message.text.lower():
         context.bot.send_photo(
             update.message.chat_id,
-            map_api.get_static_api(),
+            map_api.get_static_api(context.user_data['city'], context.user_data['address']),
             caption='Геолокация МФЦ'
         )
-        update.message.reply_text(f"Выберите время приема {LSTEP[step]}", reply_markup=calendar)
+        values_rus = {'year': 'год', 'month': 'месяц', 'day': 'день'}
+        update.message.reply_text(f"Выберите {values_rus[LSTEP[step]]} приема", reply_markup=calendar)
     return 3
 
 
@@ -309,7 +337,8 @@ def set_calendar_date(update, context):
     query = update.callback_query
     result, key, step = DetailedTelegramCalendar().process(query.data)
     if not result and key:
-        query.edit_message_text(f"Выбрано {LSTEP[step]}", reply_markup=key)
+        values_rus = {'year': 'год', 'month': 'месяц', 'day': 'день'}
+        query.edit_message_text(f"Выберите {values_rus[LSTEP[step]]} приема", reply_markup=key)
     elif result:
         # ! -------------------------
         keyboard = telegram.InlineKeyboardMarkup([
@@ -320,16 +349,65 @@ def set_calendar_date(update, context):
              telegram.InlineKeyboardButton(text='14:30', callback_data='14:30'),
              telegram.InlineKeyboardButton(text='15:30', callback_data='15:30')]
         ])
-        query.edit_message_text(f"Вы выбрали дату {result}. Выберите время:", reply_markup=keyboard)
+        context.user_data['date'] = result
+        query.edit_message_text(f"Вы выбрали дату {result} 📅📝. Выберите время:", reply_markup=keyboard)
         return 4
     return 3
 
 
 def set_time(update, context):
     query = update.callback_query
-    query.edit_message_text(query.data)
-    # Подтверждение записи на услугу
-    return 5
+    h, m = list(map(int, query.data.split(':')))
+    context.user_data['date'] = datetime.combine(context.user_data['date'], time(h, m))
+    display_text = f"Вы выбрали дату {context.user_data['date']} 📅📝."
+    query.edit_message_text(display_text)
+
+    # Сделать запись на услугу
+    db_sess = create_session()
+    serv = context.user_data['service']
+    addr = context.user_data['address']
+    date = context.user_data['date']
+
+    service = db_sess.query(Service).filter(Service.description.like(f'%{serv}%')).first().id_service
+    mfc = db_sess.query(MFC).filter(MFC.address == addr).first().id_mfc
+    regs = db_sess.query(Registration)\
+        .filter(Registration.date_admission == date)\
+        .filter(Registration.id_mfc == mfc)\
+        .filter(Registration.id_service == service).all()
+    if not regs:
+        empls = db_sess.query(Registration)\
+            .filter(Registration.date_admission != date)\
+            .filter(Registration.id_mfc == mfc).all()
+        if not empls:
+            query.edit_message_text(display_text + '\nНет свободных консультантов😖😖😖')
+        else:
+            empl = random.choice([empl.id_emp for empl in empls])
+
+            # Регистрация на прием
+            registr = Registration()
+            registr.date_registration = datetime.now()
+            registr.date_admission = date
+            registr.status = True
+            registr.id_service = service
+            registr.id_emp = empl
+            registr.id_mfc = mfc
+            registr.id_app = db_sess.query(Applicant).filter(
+                Applicant.chat_id == str(context.user_data['chat_id'])
+            ).first().id_app
+            db_sess.add(registr)
+            db_sess.commit()
+
+            uniq_nmb = db_sess.query(Registration).filter(Registration.id_mfc == mfc)\
+                .filter(Registration.date_admission == date)\
+                .filter(Registration.id_service == service)\
+                .first()\
+                .id_reg
+            # Вернем номер услуги чтобы выставлять таймер
+            query.edit_message_text(display_text + f'\nУникальный номер услуги {uniq_nmb}')
+    else:
+        query.edit_message_text(display_text + '\nНет мест на это время😖😖😖')
+
+    return ConversationHandler.END
 
 
 admission_handler = ConversationHandler(
