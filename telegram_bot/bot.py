@@ -28,6 +28,7 @@ with open('../../token_teleg') as token_file:
 
 
 def start(update, context):
+    context.user_data['chat_id'] = update.message.chat_id
     update.message.reply_text(
         "Я чат-бот 🤖, который поможет тебе определить твою проблему и предложить услугу МФЦ. При желании, после того"\
         " как ты зарегистрируешься, можешь записаться на прием, я тебе поставлю напоминалку 😉 ✅",
@@ -75,6 +76,7 @@ def news(update, context):
 def close(update, context):
     update.message.reply_text('ok', reply_markup=ReplyKeyboardRemove())
 
+
 # Установка напоминания
 def remove_job(name, context):
     current_job = context.job_queue.get_jobs_by_name(name)
@@ -91,8 +93,9 @@ def task(context):
 
 
 def set_timer(update, context):
-    chat_id = update.message.chat_id
-
+    # Можно получать уникальный адрес услуги и и по нему установить таймер
+    # chat_id = update.message.chat_id
+    chat_id = context.user_data['chat_id']
     try:
         due = int(context.args[0])  # секунды таймера
         if due < 0:
@@ -116,7 +119,7 @@ def unset_timer(update, context):
 
 #  Работа с обработчиками
 def stop(update, context):
-    # Conversion END
+    update.message.reply_text('Вы отменили процесс')
     return ConversationHandler.END
 
 
@@ -163,7 +166,7 @@ def gender(update, context):
     context.user_data['passport'] = update.message.text
     msg = update.message
     msg.delete()
-    update.message.reply_text(f'Паспортные данные введены... {context.user_data["passport"]}')
+    update.message.reply_text(f'Паспортные данные введены...')
     # Инвайт кнопка
     keyboard = telegram.InlineKeyboardMarkup([
         [telegram.InlineKeyboardButton(text='👧', callback_data='👧'),
@@ -197,15 +200,26 @@ def set_man(update, context):
         [telegram.InlineKeyboardButton(text='Сохранить', callback_data='Сохранить'),
          telegram.InlineKeyboardButton(text='Отмена', callback_data='Отмена')]
     ])
-    query.edit_message_text(f'Сохранить изменения? {context.user_data["gender"]}',
+    query.edit_message_text(f'Сохранить изменения?',
                             reply_markup=keyboard)
     return 7
 
 
 def save_changes(update, context):
     # add user in db
+    db_sess = create_session()
+    person = Applicant()
+    person.chat_id = context.user_data['chat_id']
+    person.verified = True
+    person.second_name = context.user_data['first_name']
+    person.first_name = context.user_data['second_name']
+    person.passport = context.user_data['passport']
+    person.gender = context.user_data['gender']
+    db_sess.add(person)
+    db_sess.commit()
+
     query = update.callback_query
-    query.edit_message_text(text=f'Регистрация завершена {[[k, v] for k, v in context.user_data.items()]}')
+    query.edit_message_text(text=f'Регистрация завершена')
     return ConversationHandler.END
 
 
