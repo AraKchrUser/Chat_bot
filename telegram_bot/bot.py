@@ -303,7 +303,14 @@ def define_city(update, context):
 
 def define_service(update, context):
     # Установить услугу и узнать, по какому адресу предоставить услугу!!!!!!!!!!!
-    context.user_data['service'] = 'Согласование перепланировки, Жилищные услуги'
+    question = ' '.join(context.args)
+    faq = Faq(faq_write.service_write())
+    # faq = Faq('../FAQ/data_faq_mfc.csv')
+    faq.train()
+    answer1, answer2 = faq.infer(question)[0][0].split('[sep]')
+    update.message.reply_text(answer2 + '\n' + answer1)
+
+    context.user_data['service'] = answer2
     update.message.reply_text('Теперь выбери МФЦ')
     db_sess = create_session()
 
