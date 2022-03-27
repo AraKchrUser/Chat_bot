@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/FAQ/servicedumps.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/database/FAQ.csv">
           <value>
             <Attribute>
@@ -39,6 +46,13 @@
           </value>
         </entry>
         <entry key="/telegram_bot/faqdumps.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/telegram_bot/servicedumps.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

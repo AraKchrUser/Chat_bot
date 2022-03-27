@@ -46,11 +46,11 @@ def echo(update, context):
 
 def faq(update, context):
     question = ' '.join(context.args)
-    faq = Faq(faq_write.faq_write())
+    faq = Faq(faq_write.service_write())
     # faq = Faq('../FAQ/data_faq_mfc.csv')
     faq.train()
-    answer = faq.infer(question)[0][0]
-    update.message.reply_text(answer)
+    answer1, answer2 = faq.infer(question)[0][0].split('[sep]')
+    update.message.reply_text(answer2 + '\n' + answer1)
 
 
 def define_service(update, context):
