@@ -20,13 +20,15 @@ logging.basicConfig(level=logging.ERROR)
 global_init("postgre1")
 with open('../../token_teleg') as token_file:
     TOKEN = token_file.read().strip()
+
+
 # user_info = {}
 
 
 def start(update, context):
     context.user_data['chat_id'] = update.message.chat_id
     update.message.reply_text(
-        "Я чат-бот 🤖, который поможет тебе определить твою проблему и предложить услугу МФЦ. При желании, после того"\
+        "Я чат-бот 🤖, который поможет тебе определить твою проблему и предложить услугу МФЦ. При желании, после того" \
         " как ты зарегистрируешься, можешь записаться на прием, я тебе поставлю напоминалку 😉 ✅",
         reply_markup=markup
     )
@@ -84,8 +86,8 @@ def remove_job(name, context):
 
 
 def task(context):
-    job = context.job
-    context.bot.send_message(job.context, text='Вернулся')
+    job, mfc_addr, time = context.job.context
+    context.bot.send_message(job, text=f'У вас запись на услугу по адресу {mfc_addr} в {time}')
 
 
 def set_timer(update, context):
@@ -94,7 +96,7 @@ def set_timer(update, context):
     chat_id = context.user_data['chat_id']
     try:
         due = int(context.args[0])  # секунды таймера
-        delta = int(context.args[1])  # выбранный интервал
+        delta = context.args[1]  # выбранный интервал
         srv_id = int(context.args[2])  # номер услуги
         if due < 0:
             due = 0
@@ -107,13 +109,22 @@ def set_timer(update, context):
         elif delta == 'д':
             due = 24 * 60 * 60 * due
         # job_removed = remove_job(str(chat_id), context)
-        context.job_queue.run_once(task, due, context=[chat_id, srv_id], name=str(chat_id))
+        db_sess = create_session()
+        mfc_addr = db_sess.query(MFC).filter(MFC.id_mfc ==
+                                             db_sess.query(Registration).filter(
+                                                 Registration.id_reg == srv_id).first().id_mfc) \
+            .first().address
+        time = db_sess.query(Registration).filter(
+                                                 Registration.id_reg == srv_id).first().date_admission
+        context.job_queue.run_once(task, due, context=(chat_id, mfc_addr, time), name=str(chat_id))
         text = f"Напоминание выставлено😉😉😉😉"
         # if job_removed:
         #     text += ' Старая задача удалена'
         update.message.reply_text(text)
     except (IndexError, ValueError):
         update.message.reply_text('Использование: /set <с/м/ч/д> <номер услуги>')
+    except AttributeError:
+        update.message.reply_text('Нет записи с таким номером')
 
 
 def unset_timer(update, context):
@@ -139,7 +150,6 @@ def registration(update, context):
     usr = db_session.query(Applicant).filter(Applicant.chat_id == str(context.user_data['chat_id'])).first()
     if usr:
         update.message.reply_text(f'У вас есть аккаунт, {usr.second_name}. Если Вы согласитесь, то он будет удален')
-
 
     update.message.reply_text('Начать процесс регистрации?',
                               reply_markup=keyboard)
@@ -293,7 +303,7 @@ def define_city(update, context):
 
 def define_service(update, context):
     # Установить услугу и узнать, по какому адресу предоставить услугу!!!!!!!!!!!
-    context.user_data['service'] = 'Регистрация ИП, Налоги и бизнес'
+    context.user_data['service'] = 'Согласование перепланировки, Жилищные услуги'
     update.message.reply_text('Теперь выбери МФЦ')
     db_sess = create_session()
 
@@ -370,18 +380,25 @@ def set_time(update, context):
 
     service = db_sess.query(Service).filter(Service.description.like(f'%{serv}%')).first().id_service
     mfc = db_sess.query(MFC).filter(MFC.address == addr).first().id_mfc
-    regs = db_sess.query(Registration)\
-        .filter(Registration.date_admission == date)\
-        .filter(Registration.id_mfc == mfc)\
+    regs = db_sess.query(Registration) \
+        .filter(Registration.date_admission == date) \
+        .filter(Registration.id_mfc == mfc) \
         .filter(Registration.id_service == service).all()
     if not regs:
-        empls = db_sess.query(Registration)\
-            .filter(Registration.date_admission != date)\
+        # ???????????????????????????????????????????77 узнать есть ли свободные сотрудники в это время
+        emploees = db_sess.query(Employee).all()
+        emploees_list = []
+        for emploee in emploees:
+            emploees_list.append(emploee.id_emp)
+        empls = db_sess.query(Registration) \
+            .filter(Registration.date_admission == date) \
             .filter(Registration.id_mfc == mfc).all()
+        emploeeys_busy = [emp.id_emp for emp in empls]
+        empls = set(emploees_list).difference(set(emploeeys_busy))
         if not empls:
             query.edit_message_text(display_text + '\nНет свободных консультантов😖😖😖')
         else:
-            empl = random.choice([empl.id_emp for empl in empls])
+            empl = random.choice(list(empls))
 
             # Регистрация на прием
             registr = Registration()
@@ -397,10 +414,10 @@ def set_time(update, context):
             db_sess.add(registr)
             db_sess.commit()
 
-            uniq_nmb = db_sess.query(Registration).filter(Registration.id_mfc == mfc)\
-                .filter(Registration.date_admission == date)\
-                .filter(Registration.id_service == service)\
-                .first()\
+            uniq_nmb = db_sess.query(Registration).filter(Registration.id_mfc == mfc) \
+                .filter(Registration.date_admission == date) \
+                .filter(Registration.id_service == service) \
+                .first() \
                 .id_reg
             # Вернем номер услуги чтобы выставлять таймер
             query.edit_message_text(display_text + f'\nУникальный номер услуги {uniq_nmb}')
