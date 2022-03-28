@@ -162,6 +162,10 @@ def agreement(update, context):
     db_session = create_session()
     usr = db_session.query(Applicant).filter(Applicant.chat_id == str(context.user_data['chat_id'])).first()
     if usr:
+        regs = db_session.query(Registration).filter(Registration.id_app == usr.id_app).all()
+        for reg in regs:
+            db_session.delete(reg)
+            db_session.commit()
         db_session.delete(usr)
         db_session.commit()
 
@@ -303,7 +307,7 @@ def define_city(update, context):
 
 def define_service(update, context):
     # Установить услугу и узнать, по какому адресу предоставить услугу!!!!!!!!!!!
-    question = ' '.join(context.args)
+    question = update.message.text
     faq = Faq(faq_write.service_write())
     # faq = Faq('../FAQ/data_faq_mfc.csv')
     faq.train()
