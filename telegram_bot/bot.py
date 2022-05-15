@@ -13,8 +13,6 @@ from FAQ.model import Faq
 from datetime import datetime, date, time
 import logging
 import random
-from passporteye import \
-    read_mrz  # Машиночитаемая зона паспорта для регистрации в базе данных (благодарность на гитхабе)
 
 logging.basicConfig(level=logging.ERROR)
 global_init("postgre1")
