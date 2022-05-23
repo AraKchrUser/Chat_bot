@@ -1,0 +1,24 @@
+<meta charset="utf-8">
+<script src="https://api-maps.yandex.ru/2.1/?apikey=577a0e84-44cd-4ad9-ba64-975e632e29a5&lang=ru_RU" type="text/javascript"></script>
+<div id="map" style="width:450px;height:300px"></div>
+
+<script type="text/javascript">
+ymaps.ready(function () {
+    var myMap = new ymaps.Map('map', {
+        center: [55.753994, 37.622093],
+        zoom: 9,
+        controls: ['routePanelControl']
+    });
+
+    // Получение ссылки на панель маршрутизации.
+    var control = myMap.controls.get('routePanelControl');
+
+    // Задание состояния для панели маршрутизации.
+    control.routePanel.state.set({
+        // Адрес начальной точки.
+        from: 'Москва, Льва Толстого 16',
+        // Адрес конечной точки.
+        to: 'метро Черемушки'
+    });
+});
+</script>

@@ -1,0 +1,46 @@
+<meta charset="utf-8">
+<script src="https://api-maps.yandex.ru/2.1/?apikey=577a0e84-44cd-4ad9-ba64-975e632e29a5&lang=ru_RU" type="text/javascript"></script>
+<div id="map" style="width:450px;height:300px"></div>
+
+<script type="text/javascript">
+ymaps.ready(function () {
+    var myMap = new ymaps.Map('map', {
+        center: [55.751574, 37.573856],
+        zoom: 9,
+        controls: []
+    });
+
+    // Создание экземпляра маршрута.
+    var multiRoute = new ymaps.multiRouter.MultiRoute({
+        // Точки маршрута.
+        // Обязательное поле.
+        referencePoints: [
+            'ул. Вавилова, 68, к. 2, Москва, 119261',
+            'Университетский пр., 5, Москва, 119296'
+        ]
+    }, {
+      // Автоматически устанавливать границы карты так,
+      // чтобы маршрут был виден целиком.
+      boundsAutoApply: true
+});
+
+    // Добавление маршрута на карту.
+    myMap.geoObjects.add(multiRoute);
+
+    // Подписка на событие готовности маршрута.
+    multiRoute.model.events.add('requestsuccess', function() {
+        // Получение ссылки на активный маршрут.
+        var activeRoute = multiRoute.getActiveRoute();
+        // Получение коллекции путей активного маршрута.
+        var activeRoutePaths = activeRoute.getPaths();
+        // Проход по коллекции путей.
+        activeRoutePaths.each(function(path) {
+            console.log('' + path.properties.get("coordinates"));
+            console.log("Время прохождения пути: " + path.properties.get("duration").text);
+        });
+    });
+    // Добавление маршрута на карту.
+    myMap.geoObjects.add(multiRoute);
+
+});
+</script>
