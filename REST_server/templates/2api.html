@@ -1,0 +1,77 @@
+<meta charset="utf-8">
+<script src="https://api-maps.yandex.ru/2.1/?apikey=577a0e84-44cd-4ad9-ba64-975e632e29a5&lang=ru_RU" type="text/javascript">
+</script>
+<h1 id="demo"></h1>
+<body style="background-image:url(https://abrakadabra.fun/uploads/posts/2022-02/1645978610_20-abrakadabra-fun-p-fon-telegramma-v-soobshcheniyakh-33.jpg)">
+<div id="map" style="width:800px;height:1500px;margin-left: auto; margin-right: auto;"></div>
+</body >
+
+
+<script type="text/javascript">
+ymaps.ready(function () {
+    var myMap = new ymaps.Map('map', {
+        center: [55.751574, 37.573856],
+        zoom: 9,
+        controls: ['routePanelControl']
+    });
+
+    var control = myMap.controls.get('routePanelControl');
+    control.routePanel.state.set({
+    // Адрес начальной точки.
+    from: {{point1}},
+    // Адрес конечной точки.
+    to: '{{point2}}'
+});
+
+    // Создание экземпляра маршрута.
+    var multiRoute = new ymaps.multiRouter.MultiRoute({
+        // Точки маршрута.
+        // Обязательное поле.
+        referencePoints: [
+            {{point1}},
+            '{{point2}}'
+        ],
+    params: {
+        avoidTrafficJams: true
+    }
+    }, {
+      // Автоматически устанавливать границы карты так,
+      // чтобы маршрут был виден целиком.
+      // Внешний вид путевых точек.
+    wayPointStartIconColor: "#FFFFFF",
+    wayPointStartIconFillColor: "#B3B3B3",
+    // Внешний вид линии активного маршрута.
+    routeActiveStrokeWidth: 8,
+    routeActiveStrokeStyle: 'solid',
+    routeActiveStrokeColor: "#002233",
+    // Внешний вид линий альтернативных маршрутов.
+    routeStrokeStyle: 'dot',
+    routeStrokeWidth: 3,
+    boundsAutoApply: true
+});
+    // Добавление маршрута на карту.
+    var points = route.getWayPoints();
+    points.get(0).options.set('visible', false);
+    points.get(1).options.set('visible', false);
+    myMap.geoObjects.add(multiRoute);
+
+
+
+
+    // Подписка на событие готовности маршрута.
+    multiRoute.model.events.add('requestsuccess', function() {
+        // Получение ссылки на активный маршрут.
+        var activeRoute = multiRoute.getActiveRoute();
+        // Получение коллекции путей активного маршрута.
+        var activeRoutePaths = activeRoute.getPaths();
+        // Проход по коллекции путей.
+        activeRoutePaths.each(function(path) {
+            document.getElementById("demo").innerHTML = path.properties.get("coordinates")[0];
+            console.log(path.properties.get("duration").text);
+        });
+    });
+    // Добавление маршрута на карту.
+    myMap.geoObjects.add(multiRoute);
+
+});
+</script>

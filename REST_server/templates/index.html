@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+          integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+          crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{style_path}}"/>
+    <title>Регистрация</title>
+</head>
+<body style="background-image:url(https://krot.info/uploads/posts/2021-02/1613683825_16-p-standartnii-fon-whatsapp-16.jpg)">
+<h3 align="center">Форма регистрации</h3>
+<div>
+    <form class="login_form" method="post" enctype="multipart/form-data">
+        <label text-align="center" for="text">Введите паспортные данные либо загрузите скан паспорта</label>
+        <br>
+        <div class="form-group">
+
+            <div class="form-group form-check">
+            <input type="checkbox" class="form-check-input" id="acceptRules" name="accept">
+            <label class="form-check-label" for="acceptRules">Согласен на обработку персональных данных</label>
+        </div>
+        </div>
+
+        <br>
+        <div class="form-group">
+            <label for="text">Ввести данные</label>
+            <textarea class="form-control" id="one" rows="1" name="question"
+                      placeholder="Введите номер паспорта">{{question}}</textarea>
+            <textarea class="form-control" id="two" rows="1" name="question"
+                      placeholder="Введите серию паспорта">{{question}}</textarea>
+            <div class="form-group">
+                <label text-align="center" for="text">Выберите пол</label>
+                <br>
+            <input type="radio" class="form-check-input" id="M" name="accept">
+            <label class="form-check-label" for="acceptRules">Мужской</label>
+                <input type="radio" class="form-check-input" id="F" name="accept">
+            <label class="form-check-label" for="acceptRules">Женский</label>
+        </div>
+        <br>
+        <div class="form-group">
+            <label for="text">Прикрепить документ</label>
+                               <div class="form-group">
+                                    <label for="photo">Выберите файл</label>
+                                    <input type="file" class="form-control-file" id="photo" name="file">
+                                </div>
+        </div>
+        <br>
+        <button style="background-color:#FFE4C4; color:#000000" type="submit" class="btn btn-primary"
+                name="btn_submit">Регистрация</button>
+            </div>
+    </form>
+</body>
+</html>

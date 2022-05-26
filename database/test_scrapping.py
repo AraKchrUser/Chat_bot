@@ -69,6 +69,36 @@ def get_data_faq():
     return question, answer
 
 
+def get_news():
+    url = "https://mfc-amur.ru/news/"
+    page = requests.get(url)
+    soup = bs4.BeautifulSoup(page.content, 'html.parser')
+    struct = {}
+    for count, item in enumerate(soup.find_all(class_='news__item row')[::-1][:5]):
+        key_date = item.find(class_='news__item-date col-xs-12').text
+        href = item.find(class_='news-link')['href']
+        news_ = bs4.BeautifulSoup(requests.get('https://mfc-amur.ru' + href).content,
+                                  'html.parser').find(class_='news-detail__detail-text')
+        news_text = ''
+        if news_:
+            news_text = ' '.join([elem.text for elem in news_])
+        struct[key_date + '|' + str(count)] = ('https://mfc-amur.ru' + href, ' '.join(news_text.split()))
+
+    return struct
+
+
+def get_service_description_mfc():
+    texts = []
+    items = get_sirvices()
+    refs = items[-1]
+    for ref in refs:
+        page = requests.get(ref)
+        soup = bs4.BeautifulSoup(page.content, 'html.parser')
+        texts.append([' '.join([' '.join(tag.text.split()) for tag in soup.find(id='main').find_all('p')])])
+
+    return texts
+
+
 if __name__ == "__main__":
     # question, answer = get_data_faq()
     # pd.DataFrame({'question': question, 'answer': answer}).to_csv('FAQ.csv')
@@ -93,6 +123,5 @@ if __name__ == "__main__":
     # page = requests.get(url)
     # soup = bs4.BeautifulSoup(page.content, 'html.parser')
     # pprint([[tag['href'] for tag in child.find_all('a')] for child in soup.find_all("tbody")])
-    pass
-
-
+    # pprint(get_news())
+    print(get_service_description_mfc())

@@ -1,7 +1,7 @@
 import sys
 
 
-def mrz_opencv():
+def mrz_opencv(bytes=None, path=None):
     from imutils import contours
     import imutils
     import numpy as np
@@ -11,7 +11,11 @@ def mrz_opencv():
     rectKernel = cv2.getStructuringElement(cv2.MORPH_RECT, (13, 5))
     sqKernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 21))
 
-    image = cv2.imread('../../3.jpg')
+    if not path:
+        nparr = np.fromstring(bytes, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    else:
+        image = cv2.imread(path)
     image = imutils.resize(image, height=600)
     grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     (H, W) = grey.shape
@@ -70,9 +74,9 @@ def mrz_opencv():
     mrzText = pytesseract.image_to_string(mrz)
     mrzText = mrzText.replace(' ', '')
 
-    print(mrzText)
-    cv2.imshow("MRZ", mrz)
-    cv2.waitKey(0)
+    return mrzText
+    # cv2.imshow("MRZ", mrz)
+    # cv2.waitKey(0)
 
 
 def mrz_passporteye():
@@ -84,4 +88,4 @@ def mrz_passporteye():
 
 
 if __name__ == '__main__':
-    mrz_opencv()
+    mrz_opencv(path='../../3.jpg')

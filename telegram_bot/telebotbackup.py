@@ -1,7 +1,7 @@
 import telegram
 from telegram.ext import Updater, Filters, MessageHandler, ConversationHandler
 from telegram.ext import CallbackContext, CommandHandler, CallbackQueryHandler
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton
 import telegram_bot.map_api as map_api
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 import pandas as pd
@@ -13,14 +13,19 @@ from FAQ.model import Faq
 from datetime import datetime, date, time
 import logging
 import random
+from deeppavlov import configs
+from deeppavlov.core.commands.infer import build_model
+import tensorflow as tf
+from database.test_scrapping import get_news
+from perephrase import paraphrase
+
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 logging.basicConfig(level=logging.ERROR)
 global_init("postgre1")
+model_ru = build_model(configs.squad.squad_ru_rubert, download=False)
 with open('../../token_teleg') as token_file:
     TOKEN = token_file.read().strip()
-
-
-# user_info = {}
 
 
 def start(update, context):
@@ -38,35 +43,28 @@ def help(update, context):
                               " как ты зарегистрируешься, можешь записаться на прием, я тебе поставлю напоминалку 😉 ✅")
 
 
-def echo(update, context):
-    update.message.reply_text(update.message.text)
-
-
-def faq(update, context):
-    question = ' '.join(context.args)
-    faq = Faq(faq_write.service_write())
-    # faq = Faq('../FAQ/data_faq_mfc.csv')
-    faq.train()
-    answer1, answer2 = faq.infer(question)[0][0].split('[sep]')
-    update.message.reply_text(answer2 + '\n' + answer1)
-
-
-def define_service(update, context):
-    # Функция определния сервиса, необходимого для определния услуги
-    question = ' '.join(context.args)
-    faq = Faq(faq_write.faq_write())
-    # faq = Faq('../FAQ/data_faq_mfc.csv')
-    faq.train()
-    answer = faq.infer(question)[0][0]
-    update.message.reply_text(answer)
-
-
 def news(update, context):
-    context.bot.send_photo(
-        update.message.chat_id,
-        map_api.get_static_api(),
-        caption='Вот тебе карта'
-    )
+    struct = get_news()
+    ref, text = [struct[key] for i, key in enumerate(struct)][4]
+    update.message.reply_text(text + '\n' + ref)
+
+
+def qa(update, context):
+    struct = get_news()
+    ref, text = [struct[key] for i, key in enumerate(struct)][4] # Новость 700337
+    question = ' '.join(context.args)  # В чем особенность нового раздела на сайте? # Как перейти в навигатор? # Что содержится в карточках мер? # Чем поможет новый раздел?
+    answer = model_ru([text], [question])
+    answer, char = answer[0][0], answer[1][0]
+    text_list = text.split('.')
+    summ = 0
+    i = 0
+    while summ < char:
+        summ += len(text_list[i])
+        i += 1
+    answer = text_list[i - 1]
+    print(answer)
+    # answer = paraphrase(answer, gram=10, num_beams=10, do_sample=False)
+    update.message.reply_text(answer + '\n' + ref)
 
 
 def close(update, context):
@@ -306,7 +304,7 @@ def define_city(update, context):
 def define_service(update, context):
     # Установить услугу и узнать, по какому адресу предоставить услугу!!!!!!!!!!!
     question = update.message.text
-    faq = Faq(faq_write.service_write())
+    faq = Faq('services_with_description.csv')  # Передать название файлй напрямую
     # faq = Faq('../FAQ/data_faq_mfc.csv')
     faq.train()
     answer1, answer2 = faq.infer(question)[0][0].split('[sep]')
@@ -342,6 +340,10 @@ def calendar_init(update, context):
             map_api.get_static_api(context.user_data['city'], context.user_data['address']),
             caption='Геолокация МФЦ'
         )
+        update.message.reply_text(f"Тебе интересно, как туда добраться?\n"
+                                  f"http://192.168.0.112:4567/api/news/{context.user_data['geo_loc'][0]}"
+                                  f"/{context.user_data['geo_loc'][1]}"
+                                  f"/{context.user_data['city'] + '+' + '+'.join(context.user_data['address'].replace('.', '').split())}")
         values_rus = {'year': 'год', 'month': 'месяц', 'day': 'день'}
         update.message.reply_text(f"Выберите {values_rus[LSTEP[step]]} приема", reply_markup=calendar)
     return 3
@@ -455,13 +457,42 @@ admission_handler = ConversationHandler(
 )
 
 
+def send_geolocation(update, context):
+    keybrd = [[KeyboardButton(text='Отправить геолокацию', request_location=True)]]
+    markup_for_geo = ReplyKeyboardMarkup(keybrd, row_width=1, one_time_keyboard=True, resize_keyboard=True)
+    # markup_for_geo.add(keybrd)
+    context.bot.send_message(
+        update.message.chat_id,
+        text='Отправь мне геолокацию...',
+        reply_markup=markup_for_geo
+    )
+    return 1
+
+
+def set_loc(update, context):
+    # context.user_data['passport'] = update.message.text
+    long = update.message.location.longitude
+    lat = update.message.location.latitude
+    context.user_data['geo_loc'] = (lat, long)
+    return ConversationHandler.END
+
+
+set_geolocation = ConversationHandler(
+    entry_points=[CommandHandler('get_geo', send_geolocation)],
+    states={
+        1: [MessageHandler(Filters.location, set_loc, pass_user_data=True)]
+    },
+    fallbacks=[CommandHandler('end', stop)]
+)
+
+
 def main():
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
-    dp.add_handler(CommandHandler("faq", faq, pass_args=True))
+    dp.add_handler(CommandHandler("qa", qa, pass_args=True))
     dp.add_handler(CommandHandler("news", news))
     # dp.add_handler(CommandHandler("registration", registration)) Нужно убрать для работы ConvertionalHandler
     dp.add_handler(CommandHandler("close", close))
@@ -473,6 +504,7 @@ def main():
     # dp.add_handler(MessageHandler(Filters.text, echo))  # регистрация обработчика в диспетчере
     dp.add_handler(registration_handler)
     dp.add_handler(admission_handler)
+    dp.add_handler(set_geolocation)
 
     updater.start_polling()  # запуск цикла приема и обработки сообщений
 

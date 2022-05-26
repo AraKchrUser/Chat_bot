@@ -4,5 +4,12 @@ python-telegram-bot==13.10
 jupyter
 fasttext-wheel
 deeppavlov~=0.17.2
-beautifulsoup4
+beautifulsoup4~=4.10.0
 psycopg2-binary
+pandas~=0.25.3
+numpy~=1.18.0
+scikit-learn~=0.21.2
+bs4~=0.0.1
+Flask~=2.0.3
+tensorflow~=1.15.5
+transformers~=4.16.2

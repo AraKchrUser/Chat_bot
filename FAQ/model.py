@@ -16,19 +16,10 @@ class Faq:
         # self.model_conf['dataset_reader']['data_url'] = None
         # self.model_conf['metadata']['variables']['ROOT_PATH'] = '/home/user/src/deeppavlov'
 
-        # ++++++++
         self.model_conf = read_json(configs.faq.tfidf_autofaq)
         self.model_conf['dataset_reader']['data_path'] = file
         self.model_conf['dataset_reader']['data_url'] = None
         self.model_conf['chainer']['pipe'][3]['top_n'] = 1
-
-        # self.model_conf = read_json(configs.faq.tfidf_logreg_autofaq)
-        # self.model_conf['dataset_reader']['data_path'] = file
-        # -----------------------------------
-        # self.model_conf = read_json(configs.faq.fasttext_avg_autofaq)
-        # self.model_conf['dataset_reader']['data_path'] = file
-        # self.model_conf['dataset_reader']['data_url'] = None
-        # self.model_conf['metadata']['variables']['ROOT_PATH'] = '/home/user/src/deeppavlov'
 
         self.faq = None
 
@@ -42,8 +33,8 @@ class Faq:
 
 
 if __name__ == '__main__':
-    faq = Faq('servicedumps.csv')
+    faq = Faq('../telegram_bot/services_with_description.csv')
     faq.train()
-    answer = faq.infer('У меня нет прописки')
+    answer = faq.infer('Мне не где жить, я бездомный')
     # print(answer[0][0], answer[1][0])
     print(answer)
