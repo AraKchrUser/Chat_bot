@@ -62,8 +62,7 @@ def qa(update, context):
         summ += len(text_list[i])
         i += 1
     answer = text_list[i - 1]
-    print(answer)
-    # answer = paraphrase(answer, gram=10, num_beams=10, do_sample=False)
+    answer = paraphrase(answer, gram=10, num_beams=10, do_sample=False)
     update.message.reply_text(answer + '\n' + ref)
 
 
@@ -189,10 +188,6 @@ def set_second_name(update, context):
     return 5
 
 
-def set_passport(update, context):
-    pass
-
-
 def gender(update, context):
     context.user_data['passport'] = update.message.text
     msg = update.message
@@ -209,7 +204,7 @@ def gender(update, context):
 
 
 def set_girl(update, context):
-    context.user_data['gender'] = 'муж'
+    context.user_data['gender'] = 'жен'
     query = update.callback_query
     query.answer('👧')
 
@@ -268,7 +263,6 @@ registration_handler = ConversationHandler(
             CallbackQueryHandler(disagreement, pattern=' Нет', pass_user_data=True)
             ],
         3: [MessageHandler(Filters.text & ~Filters.command, set_second_name, pass_user_data=True)],
-        4: [MessageHandler(Filters.text & ~Filters.command, set_passport, pass_user_data=True)],
         5: [MessageHandler(Filters.text & ~Filters.command, gender, pass_user_data=True),
             CallbackQueryHandler(set_girl, pattern='^' + '👧' + '$', pass_user_data=True),
             CallbackQueryHandler(set_man, pattern='^' + '👨' + '$', pass_user_data=True)],
@@ -486,6 +480,58 @@ set_geolocation = ConversationHandler(
 )
 
 
+def enter_passport(update, context):
+    keyboard = telegram.InlineKeyboardMarkup([
+        [telegram.InlineKeyboardButton(text='Да', callback_data='Да'),
+         telegram.InlineKeyboardButton(text='Нет', callback_data='Нет')]
+    ])
+
+    db_session = create_session()
+    usr = db_session.query(Applicant).filter(Applicant.chat_id == str(context.user_data['chat_id'])).first()
+    if usr:
+        update.message.reply_text(f'У вас есть аккаунт, {usr.second_name}. Если Вы согласитесь, то он будет удален')
+
+    update.message.reply_text('Начать процесс регистрации?',
+                              reply_markup=keyboard)
+    return 1
+
+
+def agree(update, context):
+    query = update.callback_query
+    # query.answer('Введите свое имя')
+    query.edit_message_text(text='http://192.168.0.112:4567/api/passport/')
+    context.bot.send_message(text='Прежде чем переходить по ссылке, скопируй chat-id ниже, он тебе пригодиться😉',
+                             chat_id=context.user_data['chat_id'])
+    context.bot.send_message(text=str(context.user_data['chat_id']), chat_id=context.user_data['chat_id'])
+    return ConversationHandler.END
+
+
+def disagree(update, context):
+    query = update.callback_query
+    query.edit_message_text(text='Регистрация отменена')
+    return ConversationHandler.END
+
+#
+# def set_token(update, context):
+#     # Заполнить данные из Базы данных
+#     context.user_data['first_name'] = update.message.text
+#     context.user_data['second_name'] = update.message.text
+#     context.user_data['passport'] = update.message.text
+#     context.user_data['gender'] = 'жен'
+#     pass
+
+
+passport_reg = ConversationHandler(
+    entry_points=[CommandHandler('enter_passport', enter_passport)],
+    states={
+        1: [CallbackQueryHandler(agree, pattern='Да', pass_user_data=True),
+            CallbackQueryHandler(disagree, pattern='Нет', pass_user_data=True)
+            ]
+    },
+    fallbacks=[CommandHandler('end', stop)]
+)
+
+
 def main():
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
@@ -501,6 +547,7 @@ def main():
                                   pass_job_queue=True,
                                   pass_chat_data=True))
     dp.add_handler(CommandHandler("unset", unset_timer, pass_chat_data=True))
+    dp.add_handler(passport_reg)
     # dp.add_handler(MessageHandler(Filters.text, echo))  # регистрация обработчика в диспетчере
     dp.add_handler(registration_handler)
     dp.add_handler(admission_handler)
