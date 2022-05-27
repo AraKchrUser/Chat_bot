@@ -31,13 +31,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="/faq_build/MFC_data.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value=";" />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="/telegram_bot/faq.csv">
           <value>
             <Attribute>
@@ -53,6 +46,20 @@
           </value>
         </entry>
         <entry key="/telegram_bot/servicedumps.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/telegram_bot/servicedumps_copy.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/telegram_bot/services_with_description.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
