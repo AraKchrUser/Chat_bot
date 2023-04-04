@@ -8,14 +8,11 @@
 <br/>
 
 #### Диаграмма вариантов использования
-
 <img src="https://user-images.githubusercontent.com/55694272/217096161-1271a6d5-7fea-45a8-9c69-713dc96fc54e.png"  width="70%" height="60%">
-
 <br/>
 
 #### Диаграмма состоянний
-![Диаграмма_состояний_ВКР drawio](https://user-images.githubusercontent.com/55694272/217096183-d76ce096-78bf-420b-b19a-af16340866be.png)
-
+<img src="https://user-images.githubusercontent.com/55694272/217096183-d76ce096-78bf-420b-b19a-af16340866be.png"  width="70%" height="60%">
 <br/>
 
 #### Диаграмма Сущность-Связь
