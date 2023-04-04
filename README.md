@@ -12,11 +12,11 @@
 <br/>
 
 #### Диаграмма состоянний
-<img src="https://user-images.githubusercontent.com/55694272/217096183-d76ce096-78bf-420b-b19a-af16340866be.png"  width="90%" height="80%">
+<img src="https://user-images.githubusercontent.com/55694272/217096183-d76ce096-78bf-420b-b19a-af16340866be.png"  width="90%" height="90%">
 <br/>
 
 #### Диаграмма Сущность-Связь
-<img src="https://user-images.githubusercontent.com/55694272/217096213-da8297c9-439b-4df0-a97b-0d0c03e8fb70.png"  width="80%" height="75%">
+<img src="https://user-images.githubusercontent.com/55694272/217096213-da8297c9-439b-4df0-a97b-0d0c03e8fb70.png"  width="80%" height="70%">
 <br/>
 
 #### Логическая модель БД
