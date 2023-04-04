@@ -20,8 +20,8 @@
 <br/>
 
 #### Логическая модель БД
-<img src="https://user-images.githubusercontent.com/55694272/217096225-2c577d97-50e6-4750-8b0b-b5b9bec4e30b.png"  width="60%" height="60%">
+<img src="https://user-images.githubusercontent.com/55694272/217096225-2c577d97-50e6-4750-8b0b-b5b9bec4e30b.png"  width="70%" height="60%">
 <br/>
 
 #### Диаграмма развертывания системы
-<img src="https://user-images.githubusercontent.com/55694272/217096262-5478ea13-f670-4db2-9b8d-90356a8d119c.png"  width="60%" height="60%">
+<img src="https://user-images.githubusercontent.com/55694272/217096262-5478ea13-f670-4db2-9b8d-90356a8d119c.png"  width="70%" height="60%">
