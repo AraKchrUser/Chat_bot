@@ -12,7 +12,7 @@
 <br/>
 
 #### Диаграмма состоянний
-<img src="https://user-images.githubusercontent.com/55694272/217096183-d76ce096-78bf-420b-b19a-af16340866be.png"  width="80%" height="60%">
+<img src="https://user-images.githubusercontent.com/55694272/217096183-d76ce096-78bf-420b-b19a-af16340866be.png"  width="90%" height="60%">
 <br/>
 
 #### Диаграмма Сущность-Связь
