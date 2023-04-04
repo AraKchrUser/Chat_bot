@@ -16,14 +16,12 @@
 <br/>
 
 #### Диаграмма Сущность-Связь
-![ER](https://user-images.githubusercontent.com/55694272/217096213-da8297c9-439b-4df0-a97b-0d0c03e8fb70.png)
-
+<img src="https://user-images.githubusercontent.com/55694272/217096213-da8297c9-439b-4df0-a97b-0d0c03e8fb70.png"  width="60%" height="60%">
 <br/>
 
 #### Логическая модель БД
-![Логическая_модель](https://user-images.githubusercontent.com/55694272/217096225-2c577d97-50e6-4750-8b0b-b5b9bec4e30b.png)
-
+<img src="https://user-images.githubusercontent.com/55694272/217096225-2c577d97-50e6-4750-8b0b-b5b9bec4e30b.png"  width="60%" height="60%">
 <br/>
 
 #### Диаграмма развертывания системы
-![Диаграмма_развертнывания_ВКР drawio](https://user-images.githubusercontent.com/55694272/217096262-5478ea13-f670-4db2-9b8d-90356a8d119c.png)
+<img src="https://user-images.githubusercontent.com/55694272/217096262-5478ea13-f670-4db2-9b8d-90356a8d119c.png"  width="60%" height="60%">
