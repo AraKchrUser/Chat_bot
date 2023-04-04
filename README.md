@@ -9,7 +9,7 @@
 
 #### Диаграмма вариантов использования
 
-<img src="https://user-images.githubusercontent.com/55694272/217096161-1271a6d5-7fea-45a8-9c69-713dc96fc54e.png"  width="60%" height="60%">
+<img src="https://user-images.githubusercontent.com/55694272/217096161-1271a6d5-7fea-45a8-9c69-713dc96fc54e.png"  width="80%" height="60%">
 
 <br/>
 
