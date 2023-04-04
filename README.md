@@ -9,6 +9,7 @@
 
 #### Диаграмма вариантов использования
 ![Варианты_использования_ВКР drawio](https://user-images.githubusercontent.com/55694272/217096161-1271a6d5-7fea-45a8-9c69-713dc96fc54e.png)
+<img src="https://user-images.githubusercontent.com/55694272/217096161-1271a6d5-7fea-45a8-9c69-713dc96fc54e.png"  width="60%" height="30%">
 
 <br/>
 
