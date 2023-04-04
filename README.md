@@ -16,7 +16,7 @@
 <br/>
 
 #### Диаграмма Сущность-Связь
-<img src="https://user-images.githubusercontent.com/55694272/217096213-da8297c9-439b-4df0-a97b-0d0c03e8fb70.png"  width="90%" height="80%">
+<img src="https://user-images.githubusercontent.com/55694272/217096213-da8297c9-439b-4df0-a97b-0d0c03e8fb70.png"  width="85%" height="80%">
 <br/>
 
 #### Логическая модель БД
